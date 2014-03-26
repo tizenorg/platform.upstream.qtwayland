@@ -40,6 +40,7 @@ WAYLANDCLIENTSOURCES += \
             ../extensions/touch-extension.xml \
             ../extensions/qtkey-extension.xml \
             ../extensions/windowmanager.xml \
+            ../extensions/xdg-shell.xml \
             ../3rdparty/protocol/text.xml \
 
 SOURCES +=  qwaylandintegration.cpp \
@@ -57,6 +58,8 @@ SOURCES +=  qwaylandintegration.cpp \
             qwaylanddatadevicemanager.cpp \
             qwaylanddatasource.cpp \
             qwaylandshellsurface.cpp \
+            qwaylandwlshellsurface.cpp \
+            qwaylandxdgsurface.cpp \
             qwaylandextendedoutput.cpp \
             qwaylandextendedsurface.cpp \
             qwaylandsubsurface.cpp \
@@ -85,6 +88,8 @@ HEADERS +=  qwaylandintegration_p.h \
             qwaylanddatadevicemanager_p.h \
             qwaylanddatasource_p.h \
             qwaylandshellsurface_p.h \
+            qwaylandwlshellsurface_p.h \
+            qwaylandxdgsurface_p.h \
             qwaylandextendedoutput_p.h \
             qwaylandextendedsurface_p.h \
             qwaylandsubsurface_p.h \
