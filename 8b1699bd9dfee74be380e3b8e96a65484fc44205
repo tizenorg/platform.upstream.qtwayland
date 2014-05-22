@@ -1,3 +1,14 @@
+Code-Review+1: Ulf Hofemeier <ulf.hofemeier@linux.intel.com>
+Verified+1: Ulf Hofemeier <ulf.hofemeier@linux.intel.com>
+Code-Review+1: Ossama Othman <ossama.othman@intel.com>
+Verified+1: Philippe Coval <philippe.coval@open.eurogiciel.org>
+Code-Review+2: Tomasz Olszak <olszak.tomasz@gmail.com>
+Submitted-by: Tomasz Olszak <olszak.tomasz@gmail.com>
+Submitted-at: Thu, 22 May 2014 02:16:00 -0700
+Reviewed-on: https://review.tizen.org/gerrit/21159
+Project: platform/upstream/qtwayland
+Branch: refs/heads/tizen
+
 Reviewed-on: https://review.tizen.org/gerrit/21159
 Project: platform/upstream/qtwayland
 Branch: refs/heads/tizen
