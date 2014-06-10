@@ -55,25 +55,39 @@ class QWaylandWindow;
 class QWaylandInputDevice;
 class QWindow;
 
-class Q_WAYLAND_CLIENT_EXPORT QWaylandShellSurface
+class Q_WAYLAND_CLIENT_EXPORT QWaylandShellSurface : public QtWayland::wl_shell_surface
 {
 public:
-    virtual ~QWaylandShellSurface() {}
-    virtual void resize(QWaylandInputDevice * /*inputDevice*/, enum wl_shell_surface_resize /*edges*/)
-    {}
+    QWaylandShellSurface(struct ::wl_shell_surface *shell_surface, QWaylandWindow *window);
+    ~QWaylandShellSurface();
 
-    virtual void move(QWaylandInputDevice * /*inputDevice*/) {}
-    virtual void setTitle(const QString & /*title*/) {}
-    virtual void setAppId(const QString & /*appId*/) {}
+    using QtWayland::wl_shell_surface::resize;
+    void resize(QWaylandInputDevice *inputDevice, enum wl_shell_surface_resize edges);
+
+    using QtWayland::wl_shell_surface::move;
+    void move(QWaylandInputDevice *inputDevice);
 
 private:
-    virtual void setMaximized() {}
-    virtual void setFullscreen() {}
-    virtual void setNormal() {}
-    virtual void setMinimized() {}
+    void setMaximized();
+    void setFullscreen();
+    void setNormal();
+    void setMinimized();
 
-    virtual void setTopLevel() {}
-    virtual void updateTransientParent(QWindow * /*parent*/) {}
+    void setTopLevel();
+    void updateTransientParent(QWindow *parent);
+    void setPopup(QWaylandWindow *parent, QWaylandInputDevice *device, int serial);
+
+    QWaylandWindow *m_window;
+    bool m_maximized;
+    bool m_fullscreen;
+    QSize m_size;
+
+    void shell_surface_ping(uint32_t serial) Q_DECL_OVERRIDE;
+    void shell_surface_configure(uint32_t edges,
+                                 int32_t width,
+                                 int32_t height) Q_DECL_OVERRIDE;
+    void shell_surface_popup_done() Q_DECL_OVERRIDE;
+
     friend class QWaylandWindow;
 };
 

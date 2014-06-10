@@ -61,7 +61,6 @@
 #include "qwaylandqtkey_p.h"
 
 #include <QtWaylandClient/private/qwayland-text.h>
-#include <QtWaylandClient/private/qwayland-xdg-shell.h>
 
 #include <QtCore/QAbstractEventDispatcher>
 #include <QtGui/private/qguiapplication_p.h>
@@ -207,11 +206,6 @@ void QWaylandDisplay::registry_global(uint32_t id, const QString &interface, uin
         mCompositor.init(registry, id);
     } else if (interface == QStringLiteral("wl_shm")) {
         mShm = static_cast<struct wl_shm *>(wl_registry_bind(registry, id, &wl_shm_interface,1));
-#ifdef USE_XDG_SHELL
-    } else if (interface == QStringLiteral("xdg_shell")) {
-        mShellXdg.reset(new QtWayland::xdg_shell(registry, id));
-        mShellXdg->use_unstable_version(QtWayland::xdg_shell::version_current);
-#endif
     } else if (interface == QStringLiteral("wl_shell")){
         mShell.reset(new QtWayland::wl_shell(registry, id));
     } else if (interface == QStringLiteral("wl_seat")) {
