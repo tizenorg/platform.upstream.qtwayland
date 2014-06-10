@@ -82,9 +82,7 @@ cp %{SOURCE1001} .
 export QTDIR=/usr/share/qt5
 export QT_WAYLAND_GL_CONFIG=wayland_egl
 touch .git
-
-qmake -qt=5 \
-    DEFINES=USE_XDG_SHELL
+qmake -qt=5 
 
 make %{?_smp_mflags}
 
