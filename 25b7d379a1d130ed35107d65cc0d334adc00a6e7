@@ -1,3 +1,11 @@
+Code-Review+2: Manuel Bachmann <manuel.bachmann@open.eurogiciel.org>
+Verified+1: Manuel Bachmann <manuel.bachmann@open.eurogiciel.org>
+Submitted-by: Manuel Bachmann <manuel.bachmann@open.eurogiciel.org>
+Submitted-at: Fri, 13 Jun 2014 08:18:44 -0700
+Reviewed-on: https://review.tizen.org/gerrit/22812
+Project: platform/upstream/qtwayland
+Branch: refs/heads/tizen
+
 Reviewed-on: https://review.tizen.org/gerrit/22812
 Project: platform/upstream/qtwayland
 Branch: refs/heads/tizen
