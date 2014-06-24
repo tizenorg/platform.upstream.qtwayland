@@ -72,7 +72,6 @@ class QWaylandWindow;
 class QWaylandEventThread;
 class QWaylandIntegration;
 class QWaylandHardwareIntegration;
-class QWaylandXdgShell;
 
 namespace QtWayland {
     class qt_output_extension;
@@ -116,7 +115,7 @@ public:
     QtWayland::wl_compositor *compositor() { return &mCompositor; }
 
     QtWayland::wl_shell *shell() { return mShell.data(); }
-    QtWayland::xdg_shell *shellXdg();
+    QtWayland::xdg_shell *shellXdg() { return mShellXdg.data(); }
 
     QList<QWaylandInputDevice *> inputDevices() const { return mInputDevices; }
     QWaylandInputDevice *defaultInputDevice() const;
@@ -172,7 +171,7 @@ private:
     QThread *mEventThread;
     QWaylandEventThread *mEventThreadObject;
     QScopedPointer<QtWayland::wl_shell> mShell;
-    QScopedPointer<QWaylandXdgShell> mShellXdg;
+    QScopedPointer<QtWayland::xdg_shell> mShellXdg;
     QList<QPlatformScreen *> mScreens;
     QList<QWaylandInputDevice *> mInputDevices;
     QList<Listener> mRegistryListeners;
