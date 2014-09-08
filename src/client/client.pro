@@ -42,6 +42,7 @@ WAYLANDCLIENTSOURCES += \
             ../extensions/windowmanager.xml \
             ../3rdparty/protocol/text.xml \
             ../3rdparty/protocol/xdg-shell.xml \
+            ../3rdparty/protocol/ivi-application.xml \
 
 SOURCES +=  qwaylandintegration.cpp \
             qwaylandnativeinterface.cpp \
@@ -61,6 +62,8 @@ SOURCES +=  qwaylandintegration.cpp \
             qwaylandwlshellsurface.cpp \
             qwaylandxdgshell.cpp \
             qwaylandxdgsurface.cpp \
+            qwaylandivishell.cpp \
+            qwaylandivisurface.cpp \
             qwaylandextendedoutput.cpp \
             qwaylandextendedsurface.cpp \
             qwaylandsubsurface.cpp \
@@ -92,6 +95,8 @@ HEADERS +=  qwaylandintegration_p.h \
             qwaylandwlshellsurface_p.h \
             qwaylandxdgshell_p.h \
             qwaylandxdgsurface_p.h \
+            qwaylandivishell_p.h \
+            qwaylandivisurface_p.h \
             qwaylandextendedoutput_p.h \
             qwaylandextendedsurface_p.h \
             qwaylandsubsurface_p.h \

@@ -51,6 +51,7 @@
 #include "qwaylanddatadevicemanager_p.h"
 #include "qwaylandhardwareintegration_p.h"
 #include "qwaylandxdgshell_p.h"
+#include "qwaylandivishell_p.h"
 
 #include "qwaylandwindowmanagerintegration_p.h"
 
@@ -62,6 +63,7 @@
 
 #include <QtWaylandClient/private/qwayland-text.h>
 #include <QtWaylandClient/private/qwayland-xdg-shell.h>
+#include <QtWaylandClient/private/qwayland-ivi-application.h>
 
 #include <QtCore/QAbstractEventDispatcher>
 #include <QtGui/private/qguiapplication_p.h>
@@ -207,6 +209,8 @@ void QWaylandDisplay::registry_global(uint32_t id, const QString &interface, uin
         mCompositor.init(registry, id);
     } else if (interface == QStringLiteral("wl_shm")) {
         mShm = static_cast<struct wl_shm *>(wl_registry_bind(registry, id, &wl_shm_interface,1));
+    } else if (interface == QStringLiteral("ivi_application")) {
+        mShellIvi.reset(new QWaylandIviShell(registry,id));
     } else if (interface == QStringLiteral("xdg_shell")
                && qEnvironmentVariableIsSet("QT_WAYLAND_USE_XDG_SHELL")) {
         mShellXdg.reset(new QWaylandXdgShell(registry,id));
@@ -277,6 +281,11 @@ void QWaylandDisplay::forceRoundTrip()
 QtWayland::xdg_shell *QWaylandDisplay::shellXdg()
 {
     return mShellXdg.data();
+}
+
+QtWayland::ivi_application *QWaylandDisplay::shellIvi()
+{
+    return mShellIvi.data();
 }
 
 QT_END_NAMESPACE

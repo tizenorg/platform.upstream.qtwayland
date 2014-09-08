@@ -39,6 +39,8 @@
 **
 ****************************************************************************/
 
+#include <unistd.h>
+
 #include "qwaylandwindow_p.h"
 
 #include "qwaylandbuffer_p.h"
@@ -48,10 +50,12 @@
 #include "qwaylandshellsurface_p.h"
 #include "qwaylandwlshellsurface_p.h"
 #include "qwaylandxdgsurface_p.h"
+#include "qwaylandivisurface_p.h"
 #include "qwaylandextendedsurface_p.h"
 #include "qwaylandsubsurface_p.h"
 #include "qwaylanddecoration_p.h"
 #include "qwaylandwindowmanagerintegration_p.h"
+#define IVI_SURFACE_ID 8000
 
 #include <QtCore/QFileInfo>
 #include <QtGui/QWindow>
@@ -95,7 +99,9 @@ QWaylandWindow::QWaylandWindow(QWindow *window)
     mWindowId = id++;
 
     if (!(window->flags() & Qt::BypassWindowManagerHint)) {
-        if (mDisplay->shellXdg()) {
+        if (mDisplay->shellIvi()) {
+                mShellSurface = new QWaylandIviSurface(mDisplay->shellIvi()->surface_create(IVI_SURFACE_ID + getpid(), object()), this);
+        } else if (mDisplay->shellXdg()) {
            if (window->type() & Qt::Window) {
                 mShellSurface = new QWaylandXdgSurface(mDisplay->shellXdg()->get_xdg_surface(object()), this);
             }
