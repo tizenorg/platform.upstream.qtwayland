@@ -102,12 +102,10 @@ private:
     QWaylandExtendedSurface *m_extendedWindow;
 
     void xdg_surface_configure(int32_t width,
-                               int32_t height) Q_DECL_OVERRIDE;
-    void xdg_surface_change_state(uint32_t state,
-                                  uint32_t value,
-                                  uint32_t serial) Q_DECL_OVERRIDE;
-    void xdg_surface_activated() Q_DECL_OVERRIDE;
-    void xdg_surface_deactivated() Q_DECL_OVERRIDE;
+                               int32_t height,
+                               struct wl_array *states,
+                               uint32_t serial
+                               ) Q_DECL_OVERRIDE;
     void xdg_surface_close() Q_DECL_OVERRIDE;
 
     friend class QWaylandWindow;

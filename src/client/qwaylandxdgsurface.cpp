@@ -93,24 +93,28 @@ void QWaylandXdgSurface::move(QWaylandInputDevice *inputDevice)
 
 void QWaylandXdgSurface::setMaximized()
 {
-    if (!m_maximized)
-        request_change_state(XDG_SURFACE_STATE_MAXIMIZED, true, 0);
+    if (!m_maximized) {
+        m_size = m_window->window()->geometry().size();
+        set_maximized();
+    }
 }
 
 void QWaylandXdgSurface::setFullscreen()
 {
-    if (!m_fullscreen)
-        request_change_state(XDG_SURFACE_STATE_FULLSCREEN, true, 0);
+    if (!m_fullscreen) {
+        m_size = m_window->window()->geometry().size();
+        set_fullscreen(0);
+    }
 }
 
 void QWaylandXdgSurface::setNormal()
 {
     if (m_fullscreen || m_maximized  || m_minimized) {
         if (m_maximized) {
-            request_change_state(XDG_SURFACE_STATE_MAXIMIZED, false, 0);
+            unset_maximized();
         }
         if (m_fullscreen) {
-            request_change_state(XDG_SURFACE_STATE_FULLSCREEN, false, 0);
+            unset_fullscreen();
         }
 
         m_fullscreen = m_maximized = m_minimized = false;
@@ -151,9 +155,9 @@ void QWaylandXdgSurface::updateTransientParent(QWindow *parent)
     Qt::WindowFlags wf = m_window->window()->flags();
     if (wf.testFlag(Qt::ToolTip)
             || wf.testFlag(Qt::WindowTransparentForInput))
-        flags |= XDG_SURFACE_SET_TRANSIENT_FOR;
+        flags |= XDG_SURFACE_SET_PARENT;
 
-    set_transient_for(parent_wayland_window->object());
+    set_parent(parent_wayland_window->object());
 }
 
 void QWaylandXdgSurface::setTitle(const QString & title)
@@ -196,44 +200,47 @@ void QWaylandXdgSurface::sendProperty(const QString &name, const QVariant &value
         m_extendedWindow->updateGenericProperty(name, value);
 }
 
-void QWaylandXdgSurface::xdg_surface_configure(int32_t width, int32_t height)
+void QWaylandXdgSurface::xdg_surface_configure(int32_t width, int32_t height, struct wl_array *states,uint32_t serial)
 {
-    m_window->configure(0 , width, height);
-}
+    uint32_t *state = 0;
 
-void QWaylandXdgSurface::xdg_surface_change_state(uint32_t state,
-                                                  uint32_t value,
-                                                  uint32_t serial)
-{
+    for (state = (uint32_t*) (states)->data;
+         (const char *) state < ((const char *) (states)->data + (states)->size);
+         (state)++)
+    {
 
-    if (state == XDG_SURFACE_STATE_MAXIMIZED
-            || state == XDG_SURFACE_STATE_FULLSCREEN) {
-        if (value) {
-            m_size = m_window->window()->geometry().size();
-        } else {
-            QMargins m = m_window->frameMargins();
-            m_window->configure(0, m_size.width() + m.left() + m.right(), m_size.height() + m.top() + m.bottom());
+        switch (*state) {
+        case XDG_SURFACE_STATE_MAXIMIZED:
+            m_maximized = true;
+            break;
+        case XDG_SURFACE_STATE_FULLSCREEN:
+            m_fullscreen = true;
+            break;
+        case XDG_SURFACE_STATE_RESIZING:
+            m_size = QSize(width,height);
+            break;
+        case XDG_SURFACE_STATE_ACTIVATED:
+            break;
+        default:
+            break;
         }
     }
 
-    switch (state) {
-    case XDG_SURFACE_STATE_MAXIMIZED:
-        m_maximized = value;
-        break;
-    case XDG_SURFACE_STATE_FULLSCREEN:
-        m_fullscreen = value;
-        break;
+    if ( width == 0 && height == 0 ) {
+        width = m_size.width();
+        height = m_size.height();
     }
 
-    xdg_surface_ack_change_state(object(), state, value, serial);
-}
+    if ( width > 0 && height > 0) {
+        if ( m_fullscreen ) {
+            m_window->configure(0, width , height );
+        } else {
+            QMargins m = m_window->frameMargins();
+            m_window->configure(0, width + m.left() + m.right(), height + m.top() + m.bottom());
+        }
+    }
 
-void QWaylandXdgSurface::xdg_surface_activated()
-{
-}
-
-void QWaylandXdgSurface::xdg_surface_deactivated()
-{
+    xdg_surface_ack_configure(object(), serial);
 }
 
 void QWaylandXdgSurface::xdg_surface_close()
