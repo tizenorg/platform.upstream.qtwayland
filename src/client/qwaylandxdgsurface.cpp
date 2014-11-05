@@ -218,25 +218,24 @@ void QWaylandXdgSurface::xdg_surface_configure(int32_t width, int32_t height, st
       state=*pos;
       statesbits |= state;
       qDebug()<<state;
-    }
 
-#if 0
       switch (state) {
       case XDG_SURFACE_STATE_MAXIMIZED:
-        m_maximized = true;
+       // m_maximized = true;
         break;
       case XDG_SURFACE_STATE_FULLSCREEN:
-        m_fullscreen = true;
+       // m_fullscreen = true;
         break;
       case XDG_SURFACE_STATE_RESIZING:
+	m_size = QSize(width,height);
 	break;
       case XDG_SURFACE_STATE_ACTIVATED:
 	break;
 
       default:
           break;
-#endif
-
+      }
+    }
 	  if ( statesbits &  XDG_SURFACE_STATE_ACTIVATED ) 
 	    {
 	      m_maximized = ( statesbits & XDG_SURFACE_STATE_MAXIMIZED ); 
@@ -245,7 +244,6 @@ void QWaylandXdgSurface::xdg_surface_configure(int32_t width, int32_t height, st
 
 {
   if ( width == 0 && height == 0 
-       //&& ! (statesbits & XDG_SURFACE_STATE_ACTIVATED) 
        ) {
     width = m_size.width();
     height = m_size.height();
