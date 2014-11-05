@@ -200,25 +200,27 @@ void QWaylandXdgSurface::sendProperty(const QString &name, const QVariant &value
         m_extendedWindow->updateGenericProperty(name, value);
 }
 
-
+#include <QDebug>
 void QWaylandXdgSurface::xdg_surface_configure(int32_t width, int32_t height, struct wl_array *states,uint32_t serial)
 {
   uint32_t *pos = 0;
   uint32_t state=0;
   QMargins m = m_window->frameMargins();
 
+  uint32_t statesbits = 0;
+  qDebug()<<"#"<<__PRETTY_FUNCTION__<<width<<"*"<<height;
 
-  if ( width > 0 && height > 0) {
-      m_window->configure(0, width + m.left() + m.right(), height + m.top() + m.bottom());
-    }
-
-  m_maximized = false;
-  m_fullscreen = false;
   //wl_array_for_each( pstate,  states) {
   for (pos = (uint32_t*) (states)->data;
        (const char *) pos < ((const char *) (states)->data + (states)->size);
        (pos)++)
     {
+      state=*pos;
+      statesbits |= state;
+      qDebug()<<state;
+    }
+
+#if 0
       switch (state) {
       case XDG_SURFACE_STATE_MAXIMIZED:
         m_maximized = true;
@@ -226,14 +228,38 @@ void QWaylandXdgSurface::xdg_surface_configure(int32_t width, int32_t height, st
       case XDG_SURFACE_STATE_FULLSCREEN:
         m_fullscreen = true;
         break;
-      case XDG_SURFACE_STATE_ACTIVATED:
-	break;
       case XDG_SURFACE_STATE_RESIZING:
 	break;
+      case XDG_SURFACE_STATE_ACTIVATED:
+	break;
+
       default:
           break;
-      }
-    }
+#endif
+
+	  if ( statesbits &  XDG_SURFACE_STATE_ACTIVATED ) 
+	    {
+	      m_maximized = ( statesbits & XDG_SURFACE_STATE_MAXIMIZED ); 
+	      m_fullscreen = ( statesbits & XDG_SURFACE_STATE_FULLSCREEN ); 
+	    }
+
+{
+  if ( width == 0 && height == 0 
+       //&& ! (statesbits & XDG_SURFACE_STATE_ACTIVATED) 
+       ) {
+    width = m_size.width();
+    height = m_size.height();
+  }
+
+  if ( width > 0 && height > 0) {
+    qDebug()<<"size="<<width<<"x"<<height;
+    // m_window->configure(0, width + m.left() + m.right(), height + m.top() + m.bottom());
+    m_window->configure(0, width + m.left() + m.right(), height + m.top() + m.bottom());
+  }
+  
+
+
+ }
   
   if ( ( ! m_maximized || ! m_fullscreen )
        && ( m_size.width() != width  || m_size.height() != height )
