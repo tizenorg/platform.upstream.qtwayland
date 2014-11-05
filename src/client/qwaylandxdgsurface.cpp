@@ -94,36 +94,35 @@ void QWaylandXdgSurface::move(QWaylandInputDevice *inputDevice)
 void QWaylandXdgSurface::setMaximized()
 {
     if (!m_maximized)
-        request_change_state(XDG_SURFACE_STATE_MAXIMIZED, true, 0);
+        set_maximized();
 }
 
 void QWaylandXdgSurface::setFullscreen()
 {
     if (!m_fullscreen)
-        request_change_state(XDG_SURFACE_STATE_FULLSCREEN, true, 0);
+        set_fullscreen(Q_NULLPTR);
 }
 
 void QWaylandXdgSurface::setNormal()
 {
     if (m_fullscreen || m_maximized  || m_minimized) {
         if (m_maximized) {
-            request_change_state(XDG_SURFACE_STATE_MAXIMIZED, false, 0);
+            unset_maximized();
         }
         if (m_fullscreen) {
-            request_change_state(XDG_SURFACE_STATE_FULLSCREEN, false, 0);
+            unset_fullscreen();
         }
 
         m_fullscreen = m_maximized = m_minimized = false;
         setTopLevel();
-        QMargins m = m_window->frameMargins();
-        m_window->configure(0, m_size.width() + m.left() + m.right(), m_size.height() + m.top() + m.bottom());
+        m_margin = m_window->frameMargins();
+        m_window->configure(0, m_size.width() + m_margin.left() + m_margin.right(), m_size.height() + m_margin.top() + m_margin.bottom());
     }
 }
 
 void QWaylandXdgSurface::setMinimized()
 {
     m_minimized = true;
-    m_size = m_window->window()->geometry().size();
     set_minimized();
 }
 
@@ -147,13 +146,7 @@ void QWaylandXdgSurface::updateTransientParent(QWindow *parent)
         transientPos.setY(transientPos.y() + parent_wayland_window->decoration()->margins().top());
     }
 
-    uint32_t flags = 0;
-    Qt::WindowFlags wf = m_window->window()->flags();
-    if (wf.testFlag(Qt::ToolTip)
-            || wf.testFlag(Qt::WindowTransparentForInput))
-        flags |= XDG_SURFACE_SET_TRANSIENT_FOR;
-
-    set_transient_for(parent_wayland_window->object());
+    set_parent(parent_wayland_window->object());
 }
 
 void QWaylandXdgSurface::setTitle(const QString & title)
@@ -196,44 +189,58 @@ void QWaylandXdgSurface::sendProperty(const QString &name, const QVariant &value
         m_extendedWindow->updateGenericProperty(name, value);
 }
 
-void QWaylandXdgSurface::xdg_surface_configure(int32_t width, int32_t height)
+void QWaylandXdgSurface::xdg_surface_configure(int32_t width, int32_t height, struct wl_array *states,uint32_t serial)
 {
-    m_window->configure(0 , width, height);
-}
+    uint32_t *state = 0;
+    bool about_to_maximize = false;
+    bool about_to_fullscreen = false;
 
-void QWaylandXdgSurface::xdg_surface_change_state(uint32_t state,
-                                                  uint32_t value,
-                                                  uint32_t serial)
-{
+    for (state = (uint32_t*) (states)->data;
+         (const char *) state < ((const char *) (states)->data + (states)->size);
+         (state)++)
+    {
+        switch (*state) {
+        case XDG_SURFACE_STATE_MAXIMIZED:
+            about_to_maximize = true;
+            break;
+        case XDG_SURFACE_STATE_FULLSCREEN:
+            about_to_fullscreen = true;
+            break;
+        case XDG_SURFACE_STATE_RESIZING:
+            m_size = QSize(width,height);
+            break;
+        case XDG_SURFACE_STATE_ACTIVATED:
+            if (!m_fullscreen && about_to_fullscreen) {
+                m_fullscreen = true;
+                m_size = m_window->window()->geometry().size();
+                m_window->window()->showFullScreen();
+            } else if (m_fullscreen && !about_to_fullscreen) {
+                m_fullscreen = false;
+                m_window->window()->showNormal();
+            } else if (!m_maximized && about_to_maximize) {
+                m_maximized = true;
+                m_size = m_window->window()->geometry().size();
+                m_window->window()->showMaximized();
+            } else if (m_maximized && !about_to_maximize) {
+                m_maximized = false;
+                m_window->window()->showNormal();
+            }
 
-    if (state == XDG_SURFACE_STATE_MAXIMIZED
-            || state == XDG_SURFACE_STATE_FULLSCREEN) {
-        if (value) {
-            m_size = m_window->window()->geometry().size();
-        } else {
-            QMargins m = m_window->frameMargins();
-            m_window->configure(0, m_size.width() + m.left() + m.right(), m_size.height() + m.top() + m.bottom());
+            if (width == 0 && height == 0) {
+                width = m_size.width();
+                height = m_size.height();
+            }
+
+            if (width > 0 && height > 0) {
+                m_margin = m_window->frameMargins();
+                m_window->configure(0, width + m_margin.left() + m_margin.right(), height + m_margin.top() + m_margin.bottom());
+            }
+            break;
+        default:
+            break;
         }
     }
-
-    switch (state) {
-    case XDG_SURFACE_STATE_MAXIMIZED:
-        m_maximized = value;
-        break;
-    case XDG_SURFACE_STATE_FULLSCREEN:
-        m_fullscreen = value;
-        break;
-    }
-
-    xdg_surface_ack_change_state(object(), state, value, serial);
-}
-
-void QWaylandXdgSurface::xdg_surface_activated()
-{
-}
-
-void QWaylandXdgSurface::xdg_surface_deactivated()
-{
+    xdg_surface_ack_configure(object(), serial);
 }
 
 void QWaylandXdgSurface::xdg_surface_close()
