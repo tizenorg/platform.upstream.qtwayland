@@ -113,9 +113,11 @@ grep QT_WAYLAND_USE_XDG_SHELL $f \
 %manifest %{name}.manifest
 %{_libdir}/libQt5WaylandClient.so.5*
 %{_libdir}/qt5/plugins/platforms/libqwayland-generic.so
+%ifnarch aarch64
 %{_libdir}/qt5/plugins/platforms/libqwayland-egl.so
 %{_libdir}/qt5/plugins/wayland-graphics-integration-client/libwayland-egl.so
 %{_libdir}/qt5/plugins/wayland-graphics-integration-client/libdrm-egl-server.so
+%endif
 %{_libdir}/qt5/plugins/wayland-decoration-client/libbradient.so
 
 
