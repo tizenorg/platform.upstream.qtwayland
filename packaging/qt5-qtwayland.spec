@@ -46,6 +46,7 @@ BuildRequires:  pkgconfig(wayland-client)
 BuildRequires:  pkgconfig(wayland-cursor)
 BuildRequires:  pkgconfig(wayland-egl)
 BuildRequires:  pkgconfig(egl)
+BuildRequires:  pkgconfig(udev)
 BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  libffi-devel
 BuildRequires:  fdupes
